@@ -115,6 +115,77 @@ public static Boolean valueOf(boolean b) {
 ```
 
 ## 2. 遇到多个构造器参数时要考虑用构建器
+如果类的构造器或者静态工厂方法中具有多个参数, 设计这种类时, Builder模式就是种不错的选择.
+
+Builder模式模拟了具名的可选参数, 就像Ada和Python中的一样.
+
+```java
+public static NutritionFacts {
+    private final int servingSize;
+    private final int servings;
+    private final int calories;
+    private final int fat;
+    private final int sodium;
+    private final int carbohydrate;
+
+    public static class Builder {
+        // Required paramters
+        private final int servingSize;
+        private final int servings;
+
+        // Optional paramters - initialized to default values
+        private int calories = 0;
+        private int fat = 0;
+        private int sodium = 0;
+        private int carbohydrate = 0;
+
+        public Builder(int servingSize, int servings) {
+            this.servingSize = servingSize;
+            this.servings = servings;
+        }
+
+        public Builder calories(int val) {
+            calories = val;
+            return this;
+        }
+
+        public Builder fat(int val) {
+            fat = val;
+            return this;
+        }
+
+        public Builder sodium(int val) {
+            sodium = val;
+            return this;
+        }
+
+        public Builder carbohydrate(int val) {
+            carbohydrate = val;
+            return this;
+        }
+
+        public NutritionFacts build() {
+            return new NutritionFacts(this);
+        }
+    }
+
+    private NutritionFacts(Builder builder) {
+        servingSize = builder.servingSize;
+        servings = builder.servings;
+        calories = builder.calories;
+        fat = builder.fat;
+        sodium = builder.sodium;
+        carbohydrate = builder.carbohydrate;
+    }
+}
+```
+
+调用builder
+
+```java
+NutritionFacts cocaCola = new NutritionFacts.Builder(240, 8)
+    .calories(100).sodium(35).carbohydrate(27).build();
+```
 
 ## 3. 用私有构造器或者枚举类型强化 _Singleton_ 属性
 
