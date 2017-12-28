@@ -180,7 +180,7 @@ public static NutritionFacts {
 }
 ```
 
-调用builder
+**_调用builder_**
 
 ```java
 NutritionFacts cocaCola = new NutritionFacts.Builder(240, 8)
@@ -188,6 +188,64 @@ NutritionFacts cocaCola = new NutritionFacts.Builder(240, 8)
 ```
 
 ## 3. 用私有构造器或者枚举类型强化 _Singleton_ 属性
+创建单例有多种的方法:
+
+* **_公有静态成员是个final域_**
+
+```java
+public class Elvis {
+    public static final Elvis INSTANCE = new Elvis();
+
+    private Elvis() { ... }
+    ...
+    public void singASong() { ... }
+}
+```
+
+有一点要提醒的是: 享有特权的客户端可以借助 _AccessibleObject.setAccessible_ 方法, 通过反射机制调用私有构造器.  
+如果需要抵御这种攻击, 可以修改构造器, 让它在被要求创建第二个实例的时候抛出异常.
+
+* **_公有的成员是个静态工厂方法_**
+
+```java
+public class Elvis {
+    private static final Elvis INSTANCE = new Elvis();
+    private Elvis() { ... }
+
+    public static Elvis getInstance() {
+        return INSTANCE;
+    }
+
+    public void singASong() { ... }
+}
+```
+
+工厂方法的优势之一在于, 它提供了灵活性: 在不改变其中API的前提下, 我们可以改变该类是否应该为 _Singleton_ 的想法.
+
+* **_序列化一个Singleton_**
+
+为了维护并保证 _Singleton_, 除了在声明中加上 "_implements Serializable_", 还必须声明所有实例域都是瞬时(_transient_)的, 并提供一个 _readResolve_ 方法.
+
+```java
+private Object readResolve() {
+    // Return the one true Elvis and let the garbage collector take care of the Elvis impersonator
+    return INSTANCE;
+}
+```
+
+* **_单元素的枚举类型, 最好的实现方式_**(Java 1.5)
+
+```java
+public enum Elvis() {
+    INSTANCE;
+    ...
+    public void singASong() { ... }
+}
+```
+
+这种方法在功能上与公有域方法相近, 但是它更加简洁, 无偿地提供了序列化机制, 绝对防止多次实例化, 即使是在面对复杂的序列化或者反射攻击的时候.
+
+单元素的枚举类型已经成为实现 _Singleton_ 的最佳方法.
 
 ## 4. 通过私有构造器强化不可实例化的能力
 
