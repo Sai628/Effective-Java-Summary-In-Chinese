@@ -101,6 +101,8 @@
 * 不必在每次调用它们的时候都创建一个新对象
 * 它们可以返回原返回类型的任何子类型的对象
 
+<br/>
+
 **_缺点_**
 
 但是, 静态工厂方法也有缺点, 主要在于:
@@ -113,6 +115,8 @@ public static Boolean valueOf(boolean b) {
     return b ? Boolean.TRUE : Boolean.FALSE;
 }
 ```
+
+<br/>
 
 ## 2. 遇到多个构造器参数时要考虑用构建器
 如果类的构造器或者静态工厂方法中具有多个参数, 设计这种类时, Builder模式就是种不错的选择.
@@ -187,6 +191,8 @@ NutritionFacts cocaCola = new NutritionFacts.Builder(240, 8)
     .calories(100).sodium(35).carbohydrate(27).build();
 ```
 
+<br/>
+
 ## 3. 用私有构造器或者枚举类型强化 _Singleton_ 属性
 创建单例有多种的方法:
 
@@ -205,6 +211,8 @@ public class Elvis {
 有一点要提醒的是: 享有特权的客户端可以借助 _AccessibleObject.setAccessible_ 方法, 通过反射机制调用私有构造器.  
 如果需要抵御这种攻击, 可以修改构造器, 让它在被要求创建第二个实例的时候抛出异常.
 
+<br/>
+
 * **_公有的成员是个静态工厂方法_**
 
 ```java
@@ -222,6 +230,8 @@ public class Elvis {
 
 工厂方法的优势之一在于, 它提供了灵活性: 在不改变其中API的前提下, 我们可以改变该类是否应该为 _Singleton_ 的想法.
 
+<br/>
+
 * **_序列化一个Singleton_**
 
 为了维护并保证 _Singleton_, 除了在声明中加上 "_implements Serializable_", 还必须声明所有实例域都是瞬时(_transient_)的, 并提供一个 _readResolve_ 方法.
@@ -232,6 +242,8 @@ private Object readResolve() {
     return INSTANCE;
 }
 ```
+
+<br/>
 
 * **_单元素的枚举类型, 最好的实现方式_**(Java 1.5)
 
@@ -246,6 +258,8 @@ public enum Elvis() {
 这种方法在功能上与公有域方法相近, 但是它更加简洁, 无偿地提供了序列化机制, 绝对防止多次实例化, 即使是在面对复杂的序列化或者反射攻击的时候.
 
 单元素的枚举类型已经成为实现 _Singleton_ 的最佳方法.
+
+<br/>
 
 ## 4. 通过私有构造器强化不可实例化的能力
 用于只包含静态方法和静态域的类.
@@ -269,6 +283,8 @@ public class UtilityClass {
 }
 ```
 
+<br/>
+
 ## 5. 避免创建不必要的对象
 * **_重用不可变的对象_**
 
@@ -288,9 +304,13 @@ String s = "stringette";
 
 这个版本只用了一个 _String_ 实例, 而不是每次执行的时候都创建一个新的实例.
 
+<br/>
+
 * **_使用静态工厂方法要优于构造器_**
 
-比如: Boolean.valueOf(String) 几乎总是优先于构造器 Boolean(String)
+比如: Boolean.valueOf(String) 几乎总是优先于构造器 Boolean(String)
+
+<br/>
 
 * **_重用那些已知不会被修改的可变对象_**
 
@@ -338,6 +358,8 @@ public class Person() {
 }
 ```
 
+<br/>
+
 * **_要优先使用基本类型而不是装箱基本类型, 要当心无意识的自动装箱_**
 
 **_不要这样做:_**
@@ -356,9 +378,13 @@ public static void main(String[] args) {
 
 变量 _sum_ 被声明成 _Long_ 而不是 _long_, 意味着程序构造了大约 2<sup>31</sup> 个多余的 _Long_ 实例.
 
+<br/>
+
 * **_对象池一般来说不是一个好的做法_**
 
 除非池中的对象是非常重量级的, 比如像: 数据库连接池.
+
+<br/>
 
 ## 6. 消除过期的对象引用
 
