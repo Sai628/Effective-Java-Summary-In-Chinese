@@ -387,6 +387,81 @@ public static void main(String[] args) {
 <br/>
 
 ## 6. 消除过期的对象引用
+**_你能找到其中的"内存泄漏"吗?_**
+
+```java
+public class Stack {
+    private Object[] elements;
+    private int size = 0;
+    private static final int DEFAULT_ININTIAL_CAPACITY = 16;
+
+    public Stack() {
+        elements = new Object[DEFAULT_ININTIAL_CAPACITY];
+    }
+
+    public void push(Object e) {
+        ensureCapacity();
+        elements[size++] = e;
+    }
+
+    public Object pop() {
+        if (size == 0) {
+            throw new EmptyStackException();
+        }
+        return elements[--size];
+    }
+
+    private void ensureCapacity() {
+        if (elements.length == size) {
+            elements = Arrays.copyOf(elements, 2 * size + 1);
+        }
+    }
+}
+```
+
+如果一个栈先是增长, 然后再收缩, 从栈中弹出来的对象将不会被当作垃圾回收. 因为栈内部维护着这些对象的过期引用(指的是永远都不会被解除的引用).
+
+* **_清空对象引用_**
+
+```java
+    public pop() {
+        if (size == 0) {
+            throw new EmptyStackException();
+        }
+
+        Object result = elements[--size];
+        elements[size] = null;  // Eliminate obsolete reference.
+        return result;
+    }
+```
+
+清空对象引用应该是一种例外, 而不是一种规范行为. 不要过度的去清空每一个对象的引用, 这样做既没必要, 也不是我们所期望的.
+
+只有类是自己管理内存的, 才应该去清空对象引用.
+
+<br/>
+
+* **_缓存中的内存泄漏_**
+
+解决缓存的内存泄漏有几种可能的方案:
+
+使用 _WeakHashMap_. 记住只有当所要缓存项的生命周期, 是由该键的外部引用而不是由值决定时, _WeakHashMap_ 才有用处.
+
+一个更为常见的做法是, 缓存应该时不时地清除掉没用的项. 这项工作可以使用一个后台线程来完成, 或者也可以在给缓存添加新条目的时候顺便进行清理. _LinkedHashMap_ 类利用它的 _removeEldestEntry_ 方法可以很容易地实现后一种方案.
+
+<br/>
+
+* **_监听器和回调中的内存泄漏_**
+
+若客户端注册了回调, 但却没有显式地取消注册, 就很可能会发生内存泄漏.
+
+解决这个问题的方法是, 只保存它们的弱引用(_weak reference_). 例如, 只将它们保存成 _WeakHashMap_ 中的键.
+
+<br/>
+
+* **_时不时的使用 Heap Profiler 工具去发现不可见的内存泄漏问题_**
+
+<br/>
 
 ## 7. 避免使用终结方法
 
