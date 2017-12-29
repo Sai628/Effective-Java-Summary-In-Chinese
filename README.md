@@ -270,6 +270,95 @@ public class UtilityClass {
 ```
 
 ## 5. 避免创建不必要的对象
+* **_重用不可变的对象_**
+
+**_不要这样做:_**
+
+```java
+String s = new String("stringette");
+```
+
+该语句每次被执行的时候都创建一个新的 _String_ 实例. 参数 "_stringette_" 本身就是一个 _String_ 实例, 如果这种用法是在一个循环中, 或者是在一个被频繁调用的方法中, 就会创建出成千上万不必要的 _String_ 实例.
+
+**_应该这样做:_**
+
+```java
+String s = "stringette";
+```
+
+这个版本只用了一个 _String_ 实例, 而不是每次执行的时候都创建一个新的实例.
+
+* **_使用静态工厂方法要优于构造器_**
+
+比如: Boolean.valueOf(String) 几乎总是优先于构造器 Boolean(String)
+
+* **_重用那些已知不会被修改的可变对象_**
+
+**_不要这样做:_**
+
+```java
+public class Person {
+    private final Date birthDate;
+    ...
+
+    public boolean isBabyBoomer() {
+        // Unnecessary allocation of expensive object
+        Calendar gmtCal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        gmtCal.set(1946, Calendar.JANUARY, 1, 0, 0, 0);
+        Date boomStart = gmtCal.getTime();
+        gmtCal.set(1965, Calendar.JANUARY, 1, 0, 0, 0);
+        Date boomEnd = gmtCal.getTime();
+        return birthDate.compareTo(boomStart) >= 0 && birthDate.compareTo(boomEnd) < 0;
+    }
+}
+```
+
+_isBabyBoomer_ 每次被调用的时候, 都会新建一个 _Calendar_, 一个 _TimeZone_ 和两个 _Date_ 实例, 这是不必要的.
+
+**_应该这样做:_**
+
+```java
+public class Person() {
+    private final Date birthDate;
+    ...
+    private static final Date BOOM_START;
+    private static final Date BOOM_END;
+
+    static {
+        Calendar gmtCal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        gmtCal.set(1946, Calendar.JANUARY, 1, 0, 0, 0);
+        BOOM_START = gmtCal.getTime();
+        gmtCal.set(1965, Calendar.JANUARY, 1, 0, 0, 0);
+        BOOM_END = gmtCal.getTime();
+    }
+
+    public boolean isBabyBoomer() {
+        return birthDate.compareTo(BOOM_START) >= 0 && birthDate.compareTo(BOOM_END) < 0;
+    }
+}
+```
+
+* **_要优先使用基本类型而不是装箱基本类型, 要当心无意识的自动装箱_**
+
+**_不要这样做:_**
+
+```java
+// Slow program. Where is the object creation?
+public static void main(String[] args) {
+    Long sum = 0L;
+    for (long i = 0; i < Integer.MAX_VALUE; i++) {
+        sum += i;
+    }
+
+    System.out.println(sum);
+}
+```
+
+变量 _sum_ 被声明成 _Long_ 而不是 _long_, 意味着程序构造了大约 2<sup>31</sup> 个多余的 _Long_ 实例.
+
+* **_对象池一般来说不是一个好的做法_**
+
+除非池中的对象是非常重量级的, 比如像: 数据库连接池.
 
 ## 6. 消除过期的对象引用
 
