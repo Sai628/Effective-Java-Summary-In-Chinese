@@ -252,11 +252,11 @@ public enum Elvis() {
 
 例如用于:
 
-* 把基本类型的值或者数组类型上的相关方法组织起来. (比如: _java.lang.Math_ 或者 _java.util.Arrays_)
+* 把基本类型的值或者数组类型上的相关方法组织起来. (比如: _java.lang.Math_ 或者 _java.util.Arrays_)
 * 把实现特定接口的对象上的静态方法(包括工厂方法)组织起来. (比如: _java.util.Collections_)
 * 把 _final_ 类上的方法组织起来, 以取代扩展该类的做法.
 
-**_包括私有构造器_**
+**_包含私有构造器_**
 
 ```java
 public class UtilityClass {
