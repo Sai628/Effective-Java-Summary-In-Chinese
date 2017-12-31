@@ -512,6 +512,75 @@ try {
 
 # 三. 对于所有对象都通用的方法
 ## 8. 覆盖 _equals_ 时请遵守通用约定
+**_以下情况时不要覆盖_**:
+
+* 类的每个实例本质上是唯一的. 例如: _Thread_
+
+* 不关心类是否提供了"逻辑相等"的测试功能. 例如: _java.util.Random_
+
+* 超类已经覆盖了 _equals_, 从超类继承过来的行为对于子类也是合适的. 例如: _Set_, _List_, _Map_
+
+* 类是私有的或者是包级私有的, 可以确定它的 _equals_ 方法永远不会被调用.
+
+<br/>
+
+**_以下情况时, 应该覆盖 equals:_**
+
+如果类具有自己特有的"逻辑相等"概念(不同于对象等同的概念), 而且超类还没有覆盖 _equals_ 以实现期望的行为.
+
+<br/>
+
+**_覆盖 equals 方法时, 需实现了等价关系_**
+
+* 自反性: _x.equals(x)==true_
+* 对称性: _x.equals(y)==y.equals(x)_
+* 传递性: _x.equals(y)==y.equals(z)==z.equals(x)_
+* 一致性: _x.equals(y)==x.equals(y)==x.equals(y)=..._
+* 非空性: _x.equals(null)->false_
+
+<br/>
+
+**_实现高质量 equals 方法的决窍:_**
+
+1. 使用 _==_ 操作符, 检查"参数是否为这个对象的引用". (这是为了性能的优化)
+
+2. 使用 _instanceof_ 操作符, 检查"参数是否为正确的类型".
+
+3. 把参数转换成正确的类型.
+
+4. 对于该类中的每个"关键(_significant_)"域, 检查参数中的域是否与该对象中对应的域相匹配.
+
+5. 当你编写完成了 _equals_ 方法之后, 应该问自己三个问题: 它是否是对称的, 传递的, 一致的? (自反性和非空性通常上会自动满足)
+
+```java
+@Override
+public boolean equals(Object o) {
+    if (o == this) {
+        return true;
+    }
+
+    if (!(o instanceof PhoneNumber)) {
+        return false;
+    }
+
+    PhoneNumber pn = (PhoneNumber)o;
+    return pn.lineNumber == lineNumber
+        && pn.prefix == prefix
+        && pn.areaCode == areaCode;
+}
+```
+
+<br/>
+
+**_最后的一些告诫:_**
+
+* 覆盖 _equals_ 时总要覆盖 _hashCode_
+
+* 不要企图让 _equals_ 方法过于智能(简单才是你的朋友)
+
+* 不是将 _equals_ 声明中的 _Object_ 对象替换为其它的类型
+
+<br/>
 
 ## 9. 覆盖 _equals_ 时总要覆盖 _hashCode_
 
