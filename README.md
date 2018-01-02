@@ -728,7 +728,7 @@ _Object_ 的 _clone_ 方法被声明为可抛出 _CloneNotSupportedException_ �
 如果专门为了继承而设计的类覆盖了 _clone_ 方法, 覆盖版本的 _clone_ 方法就应该模拟 _Object.clone_ 的行为:
 
 * 它应该被声明为 _protected_;
-* 它应该被声明为抛出 _CloneNotSupportedException_ 异常;
+* 它应该被声明为抛出 _CloneNotSupportedException_ 异常;
 * 它 **不应该** 实现 _Cloneable_ 接口.
 
 这样可使得子类具有实现或不实现 _Cloneable_ 接口的自由, 就仿佛它们直接扩展了 _Object_ 一样.
@@ -762,7 +762,7 @@ public static Yum newInstance(Yum yum);
 
 拷贝构造器的做法, 及其静态工厂方法的变形, 都比 _Cloneable/clone_ 的方式具有更多的优势:
 
-* 不依赖于某一种很有风险的, 语言之外的对象创建机制;
+* 不依赖于某一种很有风险的, 语言之外的对象创建机制;
 * 不要求遵守尚未制定好文档的规范;
 * 不会与 _final_ 域的正常使用发生冲突;
 * 不会抛出不必要的受检异常;
