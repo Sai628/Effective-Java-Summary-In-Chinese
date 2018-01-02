@@ -583,6 +583,72 @@ public boolean equals(Object o) {
 <br/>
 
 ## 9. 覆盖 _equals_ 时总要覆盖 _hashCode_
+**_hashCode 的通用约定:_**
+
+* 在应用程序的执行期间, 只要对象的 _equals_ 方法的比较操作所用到的信息没有被修改, 那么对这同一个对象调用多次, _hashCode_ 方法都必须始终如一地返回同一个整数. 在同一个应用程序的多次执行过程中, 每次执行所返回的整数可以不一致.
+
+* 如果两个对象根据 _equals(Object)_ 方法比较是相等的, 那么调用这两个对象中任意一个对象的 _hashCode_ 方法都必须产生同样的整数结果.
+
+* 如果两个对象根据 _equals(Object)_ 方法比较是不相等的, 那么调用这两个对象中任意一个对象的 _hashCode_ 方法, 则不一定要产生不同的整数结果. 但是程序员应该知道, 给不相等的对象产生截然不同的整数结果, 有可能提高散列表(_hash table_)的性能.
+
+<br/>
+
+**_覆盖 hashCode 方法的决窍:_**
+
+1. 把某个非零的常数值, 比如: 17, 保存在一个名为 _result_ 的 _int_ 类型的变量中.
+
+2. 对于对象中每个关键域 _f_ (指 _equals_ 方法中涉及的每个域), 完成以下步骤:
+
+    a. 为该域计算 _int_ 类型的散列码 _c_:
+
+        i. boolean 类型: (f ? 1 : 0)
+
+        ii. byte, char, short 或者 int 类型: (int)f
+
+        iii. long 类型: (int)(f ^ (f >>> 32))
+
+        iv. float 类型: Float.floatToIntBits(f)
+
+        v. double 类型: Double.doubleToLongBits(f), 然后按照步骤 2.a.iii, 为得到的 long 类型值计算散列值
+
+        vi. 对象引用: 如果该类的 equals 方法通过递归地调用 equals 的方式来比较这个域, 则同样为这个域递归地调用 hashCode. 如果这个域的值为 null, 则返回 0(或者其它某个常数, 但通常为 0)
+
+        vii. array 类型: 把每一个元素当做单独的域来处理. 递归地应用上述规则, 对每个重要的元素计算一个散列码, 然后根据步骤 2.b 中的做法把这些散列值组合起来. 如果数组域中的每个元素都很重要, 可以利用 Java 1.5 中新增的 Arrays.hashCode 方法.
+
+    b. 按照下面的公式, 把步骤 2.a 中计算得到的散列码 _c_ 合并到 _result_ 中:
+
+        result = 31 * result + c;
+
+3. 返回 _result_.
+
+4. 问问自己 "相等的实例是否都具有相等的散列码?".
+
+```java
+// Lazily initialized, cached hashCode
+private volatile int hashCode;
+
+@Override
+public int hashCode() {
+    int result = hashCode;
+    if (result == 0) {
+        result = 17;
+        result = 31 * result + areaCode;
+        result = 31 * result + prefix;
+        result = 31 * result + lineNumber;
+    }
+    return result;
+}
+```
+
+<br/>
+
+**_需要注意的是:_**
+
+* 在散列码的计算过程中, 可以把冗余域排除在外. (必须排除 _equals_ 比较计算中没有用到的任何域)
+
+* 不要试图从散列码计算中排除掉一个对象的关键部分来提高性能.
+
+<br/>
 
 ## 10. 始终要覆盖 _toString_
 
