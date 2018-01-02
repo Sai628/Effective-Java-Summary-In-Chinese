@@ -662,7 +662,119 @@ public int hashCode() {
 
 无论是否指定格式, 都为 _toString_ 返回值中包含的所有信息, 提供一种编程式的访问途径, 使得对象的使用者不需要自己去解析这些字符串. 例如: _PhoneNumber_ 类应该包含针对 _areaCode_, _prefix_ 和 _lineNumber_ 的访问方法.
 
+<br/>
+
 ## 11. 谨慎地覆盖 _clone_
+_Cloneable_ 接口并没有包含任何方法. 如果一个类实现了 _Cloneable_ 接口, _Object_ 的 _clone_ 方法就会返回该对象的逐域拷贝, 否则就会抛出 _CloneNotSupportedException_ 异常.
+
+如果你覆盖了非 _final_ 类中的 _clone_ 方法, 则应该返回一个通过调用 _super.clone_ 而得到的对象. 对于实现了 _Cloneable_ 的类, 我们总是期望它也提供一个功能适当的公有的 _clone_ 方法.
+
+<br/>
+
+如果对象中 **没有包含** 可变对象的域, 可以使用简单的 _clone_ 的实现:
+
+```java
+@Override
+public PhoneNumber clone() {
+    try {
+        // PhoneNumber.clone must cast the result of super.clone() before returning it.
+        return (PhoneNumber)super.clone();
+    } catch (CloneNotSupportedException e) {
+        throw new AssertionError();  // Can't happen
+    }
+}
+```
+
+<br/>
+
+但如果对象中 **包含了** 可变对象的域, 我们就需要另一种解决方案了. 因为可变域会指向内存中相同的对象, 原始的实例与被克隆的实例将会共享这些对象.
+
+_clone_ 方法就是另一个构造器, 你必须确保它不会伤害到原始的对象, 并确保正确地创建被克隆对象中的约束条件.
+
+在可变域对象上递归地调用 _clone_ 是最容易的做法:
+
+```java
+@Override
+public Stack clone() {
+    try {
+        Stack result = (Stack)super.clone();
+        // From Java 1.5, don't need casting when cloning arrays.
+        result.elements = elements.clone();
+        return result;
+    } catch (CloneNotSupportedException e) {
+        throw new AssertionError();
+    }
+}
+```
+
+<br/>
+
+_clone_ 架构与引用可变对象的 _final_ 域的正常用法是不相兼容的, 除非在原始对象和克隆之间可以安全地共享此可变对象.
+
+对于更复杂的对象的克隆, 有时递归地调用 _clone_ 是不够的, 还需要一些特别的方法.  
+例如:
+
+* 对于被克隆对象中的对象数组域, 很可能需要进行"深度拷贝". 对于容易导致栈溢出的调用, 可以在 _deepCopy_ 中用迭代代替递归.
+
+* 使用另一种方式去完成克隆操作: 先调用 _super.clone_, 然后把结果对象中的所有域都设置成它们的空白状态, 然后调用高层的方法来重新产生对象的状态.
+
+<br/>
+
+如同构造器一样, _clone_ 方法不应该在构造的过程中, 调用新对象中任何非 _final_ 的方法.
+
+_Object_ 的 _clone_ 方法被声明为可抛出 _CloneNotSupportedException_ 异常, 但是, 覆盖版本的 _clone_ 方法可能会忽略这个声明.  
+公有的 _clone_ 方法应该省略这个声明.
+
+如果专门为了继承而设计的类覆盖了 _clone_ 方法, 覆盖版本的 _clone_ 方法就应该模拟 _Object.clone_ 的行为:
+
+* 它应该被声明为 _protected_;
+* 它应该被声明为抛出 _CloneNotSupportedException_ 异常;
+* 它 **不应该** 实现 _Cloneable_ 接口.
+
+这样可使得子类具有实现或不实现 _Cloneable_ 接口的自由, 就仿佛它们直接扩展了 _Object_ 一样.
+
+值得注意的是:
+
+> 如果你决定用线程安全的类实现 _Cloneable_ 接口, 要记得它的 _clone_ 方法必须得到很好的同步.
+
+简而言之, 实现了 _Cloneable_ 接口的类, 都应该像以下步骤这样创建一个方法:
+
+* 用一个公有的方法覆盖 _clone_;
+* 返回的对象类型是当前的类;
+* 首先调用 _super.clone_ 方法;
+* 然后修改任何需要修正的域.
+
+<br/>
+
+最好提供某些其它的途径来代替对象拷贝, 或者干脆不提供这样的功能.
+
+**_拷贝构造器_**
+
+```java
+public Yum(Yum yum);
+```
+
+**_拷贝工厂_**
+
+```java
+public static Yum newInstance(Yum yum);
+```
+
+拷贝构造器的做法, 及其静态工厂方法的变形, 都比 _Cloneable/clone_ 的方式具有更多的优势:
+
+* 不依赖于某一种很有风险的, 语言之外的对象创建机制;
+* 不要求遵守尚未制定好文档的规范;
+* 不会与 _final_ 域的正常使用发生冲突;
+* 不会抛出不必要的受检异常;
+* 不需要进行类型转换.
+
+除此之外, 基于接口的拷贝构造器和拷贝工厂(更准确的应叫 "转换构造器" 和 "转换工厂"), 允许客户选择拷贝的实现类型
+
+```java
+public HashSet(Set set) -> TreeSet;
+```
+
+<br/>
 
 ## 12. 考虑实现 _Comparable_ 接口
 
