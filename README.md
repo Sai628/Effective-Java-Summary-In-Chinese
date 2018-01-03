@@ -530,7 +530,7 @@ try {
 
 <br/>
 
-**_覆盖 equals 方法时, 需实现了等价关系_**
+**_覆盖 equals 方法时, 需实现了等价关系:_**
 
 * 自反性: _x.equals(x)==true_
 * 对称性: _x.equals(y)==y.equals(x)_
@@ -732,6 +732,8 @@ _Object_ 的 _clone_ 方法被声明为可抛出 _CloneNotSupportedException_ �
 * 它 **不应该** 实现 _Cloneable_ 接口.
 
 这样可使得子类具有实现或不实现 _Cloneable_ 接口的自由, 就仿佛它们直接扩展了 _Object_ 一样.
+
+<br/>
 
 值得注意的是:
 
