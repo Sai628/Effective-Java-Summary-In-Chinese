@@ -777,6 +777,57 @@ public HashSet(Set set) -> TreeSet;
 <br/>
 
 ## 12. 考虑实现 _Comparable_ 接口
+_Comparable_ 是一个接口, 它并没有在 _Object_ 中声明.
+
+为实现 _Comparable_ 接口的对象数组进行排序可以简单地使用: _Arrays.sort(a);_
+
+一旦类实现了 _Comparable_ 接口, 它就可以跟许多泛型算法以及依赖于该接口的集合实现进行协作. 你付出很小的努力就可以获得非常强大的功能.
+
+_compareTo_ 方法需遵循以下的约定(自反性, 对称性, 传递性)
+
+* if a > b then b < a;  if a == b then b == a;  if a < b then b > a;
+
+* if a > b and b > c then a > c;
+
+* if a == b and b == c then a == c;
+
+* 强烈建议: (x.compareTo(y) == 0) == (x.equals(y))
+
+<br/>
+
+比较整数型基本类型的域, 可以使用关系操作符 < 和 >. 对于浮点域, 需使用 _Double.compare_ 或者 _Float.compare_. 对于数组域, 则要把这些指导原则应用到每个元素上.
+
+如果一个类有多个关键域, 那么, 按什么样的顺序来比较这些域是非常关键的. 你必须从最关键的域开始, 逐步进行到所有的重要域.
+
+```java
+public int compareTo(PhoneNumber pn) {
+    // Compare area codes
+    if (areaCode < pn.areaCode) {
+        return -1;
+    }
+    if (areaCode > pn.areaCode) {
+        return 1;
+    }
+
+    // Area codes are equal, compare prefixes
+    if (prefix < pn.prefix) {
+        return -1;
+    }
+    if (prefix > pn.prefix) {
+        return 1;
+    }
+
+    // Area codes and prefixes are equal, compare line numbers
+    if (lineNumber < pn.lineNumber) {
+        return -1;
+    }
+    if (lineNumber > pn.lineNumber) {
+        return 1;
+    }
+
+    return 0;  // All fields are equal
+}
+```
 
 <br/>
 
