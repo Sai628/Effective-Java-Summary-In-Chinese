@@ -888,7 +888,90 @@ public static final Thing[] values() {
 }
 ```
 
+<br/>
+
 ## 14. 在公有类中使用访问方法而非公有域
+退化类(_Degenerate classes_)不应该是公有的
+
+```java
+class Point {
+    public double x;
+    public double y;
+}
+```
+
+因为这些类:
+
+* 没有提供封装的功能;
+* 如果不改变API, 就无法改变它的数据表示法;
+* 无法强加任何约束条件;
+* 当域被访问的时候, 无法采取任何辅助的行动.
+
+<br/>
+
+对于可变的类来说, 应该用包含私有域和公有设值方式(_setter_)的类代替:
+
+```java
+class Point {
+    private double x;
+    private double y;
+
+    public Point(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+}
+```
+
+<br/>
+
+* 如果类可以在它所在的包的外部进行访问, 就提供访问方法.
+
+* 如果类是包级私有的, 或者是私有的嵌套类, 直接暴露它的数据域并没有本质的错误.
+
+* 公有类永远都不应该暴露可变的域. 虽然还是有问题, 但是让公有类暴露不可变的域其危害比较小.
+
+```java
+// Public class with exposed immutable fields - questionable
+public final class Time {
+    private static final int HOURS_PER_DAY = 24;
+    private static final int MINUTES_PER_HOUR = 60;
+
+    public final int hour;
+    public final int minute;
+
+    public Time(int hour, int minute) {
+        if (hour < 0 || hour >= HOURS_PER_DAY) {
+            throw new IllegalArgumentException("Hour: " + hour);
+        }
+        if (minute < 0 || minute >= MINUTES_PER_HOUR) {
+            throw new IllegalArgumentException("Min: " + minute);
+        }
+        this.hour = hour;
+        this.minute = minute;
+    }
+
+    ... // Remainder omitted
+}
+```
+
+<br/>
 
 ## 15. 使可变性最小化
 
