@@ -974,6 +974,125 @@ public final class Time {
 <br/>
 
 ## 15. 使可变性最小化
+不可变类只是其实例不能被修改的类. 每个实例中包含的所有信息都必须在创建该实例的时候就提供, 并在对象的整个生命周期内固定不变.  
+不可变的类比可变类更加易于设计、实现和使用. 它们不容易出错, 且更加安全.
+
+<br/>
+
+__为了使类成为不可变, 要遵循下面5条规则:__
+
+* 不要提供任何会修改对象状态的方法
+
+* 保证类不会被扩展
+
+* 使所有的域都是 _final_ 的
+
+* 使所有的域都成为私有的
+
+* 确保对于任何可变组件的互斥访问
+
+<br/>
+
+```java
+public final class Complex {
+    private final double re;
+    private final double im;
+
+    public Complex(double re, double im) {
+        this.re = re;
+        this.im = im;
+    }
+
+    // Accessors with no corresponding mutators
+    public double realPart() {
+        return re;
+    }
+
+    public double imaginaryPart() {
+        return im;
+    }
+
+    public Complex add(Complex c) {
+        return new Complex(re + c.re, im + c.im);
+    }
+
+    public Complex subtract(Complex c) {
+        return new Complex(re - c.re, im - c.im);
+    }
+
+    ...
+
+    @Override
+    public boolean equals(Object o) {
+        ...
+    }
+}
+```
+
+这些算术运算创建并返回新的 _Complex_ 实例. (函数的做法)
+
+<br/>
+
+不可变对象比较简单, 它们在整个生命周期内只有一种状态.
+
+不可变对象本质上是线程安全的, 它们不要求同步. 它们可以被自由地共享, 并且可以重用现有的实例.
+
+```java
+public static final Complex ZERO = new Complex(0, 0);
+public static final Complex ONE = new Complex(1, 0);
+public static final Complex I = new Complex(0, 1);
+```
+
+不可变的类可以提供一些静态工厂, 它们把频繁被请求的实例缓存起来, 从而当现在实例可以符合请求的时候, 就不必创建新的实例.
+
+<br/>
+
+不仅可以共享不可变对象, 甚至也可以共享它们的内部信息.
+
+不可变对象为其它对象提供了大量的构件(_building blocks_).
+
+不可变类真正唯一的缺点是, 对于每个不同的值都需要一个单独的对象. 在某些情况下, 这会带来性能的问题.
+
+<br/>
+
+__如何禁止不可变对象子类化__
+* 使类成为 _final_ 的
+* 让类的所有构造器都变成私有的或者包级私有的, 并添加公有的静态工厂来代替公有的构造器
+
+```java
+// Immutable class with static factories instead of constructors
+public class Complex {
+    private final double re;
+    private final double im;
+
+    private Complex(double re, double im) {
+        this.re = re;
+        this.im = im;
+    }
+
+    public static Complex valueOf(double re, double im) {
+        return new Complex(re, im);
+    }
+
+    ... // Remainder unchanged
+}
+```
+
+除了允许多个实现类的灵活性之外, 这种方法还使得有可能通过改善静态工厂的对象缓存能力, 在后续的发行版本中改进该类的性能. 并且允许创建更多的工厂方法, 其名字就可以阐明其功能.
+
+<br/>
+
+__总结__
+
+* 除非有很好的理由要让类成为可变的类, 否则就应该是不可变的
+
+* 如果类不能被做成是不可变的, 仍然应该尽可能地限制它的可变性
+
+* 除非有令人信服的理由要使域变成是非 _final_ 的, 否则要使每个域都是 _final_ 的
+
+* 可以减轻一些规则以提高性能(缓存, 延迟初始化...)
+
+<br/>
 
 ## 16. 复合优于继承
 
